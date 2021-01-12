@@ -1,15 +1,22 @@
 import os
 from discord.ext import commands
+from discord.ext.tasks import loop
+from discord import File, utils
 from utils import printJSON, NotEnoughSongsError
 from spotify import SpotifyIndex
 from dota import DotaIndex
 from dotenv import load_dotenv
+from temp_monitor import get_temperatures, monkaS_temp
+import asyncio
+
 
 load_dotenv()
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
-bot = commands.Bot('#')
+bot = commands.Bot('>')
 sp = SpotifyIndex()
+
+moderators = None
 
 
 @bot.event
@@ -75,11 +82,33 @@ async def myList(ctx, *args):
 
 @bot.event
 async def on_ready():
+    global moderators
     print(
         f'{bot.user} has connected to Discord!\n \n'
         'Connected to following guilds:'
     )
     for guild in bot.guilds:
         print(f'{guild.name}(id: {guild.id})')
+        moderators = utils.get(guild.roles, id=288748781841809409)
 
+
+@loop(seconds=1)
+async def temp_logger():
+    # Not sure what this does. Probably gives other functions priority over it.
+    channel = bot.get_channel(789164708133339157)  # XDD
+    while True:
+        log, worrysome = get_temperatures()
+        print(moderators)
+        if worrysome and moderators:
+            await channel.send(f'{moderators.mention} temps over {monkaS_temp}', file=File(log))
+        else:
+            await channel.send(file=File(log))
+
+
+@temp_logger.before_loop
+async def temp_logger_before():
+    await bot.wait_until_ready()
+
+
+temp_logger.start()
 bot.run(DISCORD_TOKEN)
