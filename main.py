@@ -7,7 +7,6 @@ from spotify import SpotifyIndex
 from dota import DotaIndex
 from dotenv import load_dotenv
 from temp_monitor import get_temperatures, monkaS_temp
-import asyncio
 
 
 load_dotenv()
@@ -92,7 +91,7 @@ async def on_ready():
         moderators = utils.get(guild.roles, id=288748781841809409)
 
 
-@loop(seconds=1)
+@loop(seconds=128)
 async def temp_logger():
     # Not sure what this does. Probably gives other functions priority over it.
     channel = bot.get_channel(789164708133339157)  # XDD

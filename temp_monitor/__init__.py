@@ -43,5 +43,3 @@ def get_ticks(n: int, l=0.0, i=1, t=4) -> list:
     else:
         return [i] + get_ticks(n, l + n % t, int(i + n/t))
 
-
-get_temperatures()
