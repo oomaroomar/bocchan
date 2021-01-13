@@ -92,7 +92,7 @@ async def on_ready():
         moderators = utils.get(guild.roles, id=288748781841809409)
 
 
-@loop(seconds=128)
+@loop(seconds=130)
 async def temp_logger():
     # Not sure what this does. Probably gives other functions priority over it.
     channel = bot.get_channel(789164708133339157)  # XDD

@@ -1,4 +1,8 @@
 **/.env
 **/__pycache__
 **/logs/*
+<<<<<<< HEAD
 **/templogger.sh
+=======
+**/templogger.sh
+>>>>>>> 809792979164478acd45f2338726ff6aceb01129
