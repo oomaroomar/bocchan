@@ -6,7 +6,7 @@ from utils import printJSON, NotEnoughSongsError
 from spotify import SpotifyIndex
 from dota import DotaIndex
 from dotenv import load_dotenv
-from temp_monitor import get_temperatures, monkaS_temp
+from temp_monitor import get_tempgraph_path, monkaS_temp
 import asyncio
 
 
@@ -92,12 +92,12 @@ async def on_ready():
         moderators = utils.get(guild.roles, id=288748781841809409)
 
 
-@loop(seconds=1)
+@loop(seconds=128)
 async def temp_logger():
     # Not sure what this does. Probably gives other functions priority over it.
     channel = bot.get_channel(789164708133339157)  # XDD
     while True:
-        log, worrysome = get_temperatures()
+        log, worrysome = get_tempgraph_path()
         print(moderators)
         if worrysome and moderators:
             await channel.send(f'{moderators.mention} temps over {monkaS_temp}', file=File(log))

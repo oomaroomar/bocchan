@@ -1,5 +1,5 @@
 #!/bin/bash
-runtime="64 sec"
+runtime="3 sec"
 endtime=$(date -ud "$runtime" +%s)
 
 while [[ $(date -u +%s) -le $endtime ]]
