@@ -1,6 +1,6 @@
 import os
 import random
-import requests
+import json
 from dotenv import load_dotenv
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -17,8 +17,7 @@ class SpotifyIndex:
     def __init__(self):
         self.sp = spotipy.Spotify(
             client_credentials_manager=SpotifyClientCredentials(CLIENT_ID, CLIENT_SECRET))
-        self.playlists = {'ChilledCow': self.sp.playlist(
-            'spotify:playlist:31FWVQBp3WQydWLNhO0ACi')}
+        self.playlists = self.load_backup()
 
      # 'Static' functions (don't rely on app state aka self.playlists)
     def get_tracklink_by_id(self, tid: str):
@@ -30,22 +29,38 @@ class SpotifyIndex:
 
      # Setters
     def add_playlist(self, dUser: str, playlist: str):
-        self.playlists[dUser] = self.sp.playlist(playlist)
+        self.playlists[dUser] = playlist
+        self.backup()
         return self.get_playlist(dUser)
+
+    def backup(self):
+        stringified = json.dumps(self.playlists)
+        path = os.path.dirname(os.path.abspath(__file__))
+        f = open(f'{path}/backup.txt', 'w')
+        f.write(stringified)
+
+    def load_backup(self):
+        path = os.path.dirname(os.path.abspath(__file__))
+        f = open(f'{path}/backup.txt', 'r')
+        stringified = f.read()
+        jsonified = json.loads(stringified)
+        print(type(jsonified))
+        return jsonified
 
     # Getters
 
     def get_playlists(self):
         minified = {}
         for dUser in self.playlists:
-            minified[dUser] = self.playlists.get(
-                dUser)['external_urls']['spotify']
+            minified[dUser] = self.get_playlist(
+                dUser)
         return minified
 
     def get_playlist(self, dUser: str):
         pl = self.playlists.get(dUser)
         if(pl == None):
             return None
+        pl = self.sp.playlist(pl)
         return pl['external_urls']['spotify']
 
     # for !suggest command
@@ -69,7 +84,8 @@ class SpotifyIndex:
         return tracks
 
     def get_track_from_user_playlist(self, dUser: str, count=1):
-        playlist_tracks = self.playlists.get(dUser)['tracks']['items']
+        playlist_tracks = self.sp.playlist(self.playlists.get(dUser))[
+            'tracks']['items']
         if(playlist_tracks == None):
             raise TypeError
         if(count > len(playlist_tracks)):

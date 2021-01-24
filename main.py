@@ -4,31 +4,41 @@ from discord.ext.tasks import loop
 from discord import File, utils
 from utils import printJSON, NotEnoughSongsError
 from spotify import SpotifyIndex
-from dota import DotaIndex
 from dotenv import load_dotenv
 from temp_monitor import get_tempgraph_path, monkaS_temp
-import asyncio
 
 
 load_dotenv()
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
-bot = commands.Bot('>')
+bot = commands.Bot(command_prefix='!')
 sp = SpotifyIndex()
 
 moderators = None
 
 
 @bot.event
-async def on_message(message):
-    if message.content.find('gyazo') != -1:
-        await message.channel.send(f'{message.author.mention()} consider installing ShareX from https://getsharex.com/')
-        await bot.delete_message(message)
-    return
+async def on_ready():
+    global moderators
+    print(
+        f'{bot.user} has connected to Discord!\n \n'
+        'Connected to following guilds:'
+    )
+    for guild in bot.guilds:
+        print(f'{guild.name}(id: {guild.id})')
+        print(f'Spotify playlists: {sp.get_playlists()}')
+        moderators = utils.get(guild.roles, id=288748781841809409)
+
+
+@bot.command(name='ping')
+async def ping(ctx):
+    await ctx.send('pong')
 
 
 @bot.command(name='songsuggest', aliases=['ss', 'suggest'])
 async def songSuggest(ctx, dUser='everyone', count=1):
+    print(
+        'in song suggest with arguments: \n ctx: {ctx} \n dUser: {dUser} \n count: {count}')
     if count > 15:
         count = 15
         await ctx.send('You can only ask for 15 songs at a time')
@@ -80,26 +90,13 @@ async def myList(ctx, *args):
         await ctx.send(f'Playlist of uri {args[0]} doesn\'t exist')
 
 
-@bot.event
-async def on_ready():
-    global moderators
-    print(
-        f'{bot.user} has connected to Discord!\n \n'
-        'Connected to following guilds:'
-    )
-    for guild in bot.guilds:
-        print(f'{guild.name}(id: {guild.id})')
-        moderators = utils.get(guild.roles, id=288748781841809409)
-
-
-@loop(seconds=130)
+@loop()
 async def temp_logger():
     # Not sure what this does. Probably gives other functions priority over it.
     channel = bot.get_channel(789164708133339157)  # XDD
     while True:
-        log, worrysome = get_tempgraph_path()
-        print(moderators)
-        if worrysome and moderators:
+        log, worrysome = await get_tempgraph_path()
+        if worrysome:
             await channel.send(f'{moderators.mention} temps over {monkaS_temp}', file=File(log))
         else:
             await channel.send(file=File(log))

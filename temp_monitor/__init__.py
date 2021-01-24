@@ -4,6 +4,7 @@ import os
 import time
 import pandas as pd
 import matplotlib.pyplot as plt
+import asyncio
 
 
 def current_milli_time(): return int(time.time()*1000)
@@ -13,24 +14,24 @@ cpu = Cpu(monitoring_latency=1)
 monkaS_temp = 60
 
 
-def temp_monitor(length=128, interval=1.1) -> list:
+async def temp_monitor(length=128, interval=1.1) -> list:
     temps = []
     until = current_milli_time() + length * 1000
     with cpu:
         while(current_milli_time() < until):
             temps.append((datetime.now().strftime('%T'), cpu.temperature))
-            time.sleep(interval)
+            await asyncio.sleep(interval)
 
     return temps
 
 
-def get_tempgraph_path():
+async def get_tempgraph_path():
     # Helper variables
     today = datetime.now().strftime('%d.%m.%Y')
     path = os.path.dirname(os.path.abspath(__file__))
 
     # Get the juice
-    output = temp_monitor()
+    output = await temp_monitor()
     temps = pd.DataFrame(output)
     temps.columns = ['timestamp', 'temperature']
     worrysome = temps['temperature'].max() >= monkaS_temp
