@@ -44,7 +44,6 @@ class SpotifyIndex:
         f = open(f'{path}/backup.txt', 'r')
         stringified = f.read()
         jsonified = json.loads(stringified)
-        print(type(jsonified))
         return jsonified
 
     # Getters

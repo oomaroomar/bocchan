@@ -1,4 +1,5 @@
 import os
+import json
 from discord.ext import commands
 from discord.ext.tasks import loop
 from discord import File, utils
@@ -6,6 +7,7 @@ from utils import printJSON, NotEnoughSongsError
 from spotify import SpotifyIndex
 from dotenv import load_dotenv
 from temp_monitor import get_tempgraph_path, monkaS_temp
+import requests
 
 
 load_dotenv()
@@ -17,22 +19,22 @@ sp = SpotifyIndex()
 moderators = None
 
 
-@bot.event
-async def on_ready():
-    global moderators
-    print(
-        f'{bot.user} has connected to Discord!\n \n'
-        'Connected to following guilds:'
-    )
-    for guild in bot.guilds:
-        print(f'{guild.name}(id: {guild.id})')
-        print(f'Spotify playlists: {sp.get_playlists()}')
-        moderators = utils.get(guild.roles, id=288748781841809409)
+@bot.command('catJAM')
+async def cat_jam(ctx, *args):
+    await ctx.message.delete()
+    header = ''
+    for arg in args:
+        header = header + ' ' + arg
+    await ctx.send(f'{header}', file=File('./media/catJAM.gif'))
 
 
-@bot.command(name='ping')
-async def ping(ctx):
-    await ctx.send('pong')
+@bot.command('FerretLOL', aliases=["<:FerretLOL:800680344319295488>"])
+async def random_ferret(ctx):
+    if '<' not in ctx.message.content:
+        await ctx.message.delete()
+    r = requests.get('https://polecat.me/api/ferret').text
+    rf = json.loads(r)['url']
+    await ctx.send(rf)
 
 
 @bot.command(name='songsuggest', aliases=['ss', 'suggest'])
@@ -90,6 +92,24 @@ async def myList(ctx, *args):
         await ctx.send(f'Playlist of uri {args[0]} doesn\'t exist')
 
 
+@bot.event
+async def on_ready():
+    global moderators
+    print(
+        f'{bot.user} has connected to Discord!\n \n'
+        'Connected to following guilds:'
+    )
+    for guild in bot.guilds:
+        print(f'{guild.name}(id: {guild.id})')
+        print(f'Spotify playlists: {sp.get_playlists()}')
+        moderators = utils.get(guild.roles, id=288748781841809409)
+
+
+@bot.command(name='ping')
+async def ping(ctx):
+    await ctx.send('pong')
+
+
 @loop()
 async def temp_logger():
     # Not sure what this does. Probably gives other functions priority over it.
@@ -108,4 +128,5 @@ async def temp_logger_before():
 
 
 temp_logger.start()
+
 bot.run(DISCORD_TOKEN)
