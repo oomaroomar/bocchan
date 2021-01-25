@@ -21,10 +21,10 @@ moderators = None
 
 @bot.command('catJAM')
 async def cat_jam(ctx, *args):
-    header = ''
+    header = 'https://cdn.betterttv.net/emote/5f1b0186cf6d2144653d2970/2x'
     for arg in args:
         header = header + ' ' + arg
-    await ctx.message.edit(f'https://cdn.betterttv.net/emote/5f1b0186cf6d2144653d2970/2x {header}')
+    await ctx.message.edit(header)
     # await ctx.send(f'{header}', file=File('./media/catJAM.gif'))
 
 
