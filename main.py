@@ -21,6 +21,7 @@ moderators = None
 
 @bot.command('catJAM')
 async def cat_jam(ctx, *args):
+    await ctx.message.delete()
     header = ''
     for arg in args:
         header = header + ' ' + arg
