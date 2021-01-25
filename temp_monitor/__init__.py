@@ -1,4 +1,4 @@
-from pyspectator.processor import Cpu
+from psutil import sensors_temperatures
 from datetime import datetime
 import os
 import time
@@ -10,17 +10,16 @@ import asyncio
 def current_milli_time(): return int(time.time()*1000)
 
 
-cpu = Cpu(monitoring_latency=1)
 monkaS_temp = 60
 
 
 async def temp_monitor(length=128, interval=1.1) -> list:
     temps = []
     until = current_milli_time() + length * 1000
-    with cpu:
-        while(current_milli_time() < until):
-            temps.append((datetime.now().strftime('%T'), cpu.temperature))
-            await asyncio.sleep(interval)
+    while(current_milli_time() < until):
+        temps.append((datetime.now().strftime('%T'),
+                      sensors_temperatures()['coretemp'][0][1]))
+        await asyncio.sleep(interval)
 
     return temps
 

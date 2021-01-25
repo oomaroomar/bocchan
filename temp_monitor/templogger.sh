@@ -1,9 +1,5 @@
 #!/bin/bash
-<<<<<<< HEAD
-runtime="3 sec"
-=======
 runtime="128 sec"
->>>>>>> 809792979164478acd45f2338726ff6aceb01129
 endtime=$(date -ud "$runtime" +%s)
 
 while [[ $(date -u +%s) -le $endtime ]]
